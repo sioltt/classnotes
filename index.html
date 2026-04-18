@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Notes to Discord</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background: #2c2f33; color: white; }
+        textarea { width: 90%; max-width: 500px; height: 150px; border-radius: 8px; padding: 10px; font-size: 16px; margin-bottom: 10px; }
+        button { background: #5865F2; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 18px; }
+        button:active { background: #4752c4; }
+    </style>
+</head>
+<body>
+
+    <h2>📝 Send a Note</h2>
+    <textarea id="noteInput" placeholder="Type your note here..."></textarea>
+    <br>
+    <button onclick="sendNote()">Send to Discord</button>
+
+    <script>
+        async function sendNote() {
+            const note = document.getElementById('noteInput').value;
+            // ⚠️ REPLACE THE URL BELOW WITH YOUR ACTUAL WEBHOOK URL
+            const webhookUrl = 'https://discord.com/api/webhooks/1494854883646636224/i8T5DegUo1TBov2VdcGyM8BSTuRXQDdHDBoGPURGJ4xgj35CbaVbW-0-M8Ml_zVa27CL';
+
+            if (!note) return alert("Write something first!");
+
+            const payload = {
+                content: note
+            };
+
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    alert("Sent!");
+                    document.getElementById('noteInput').value = ''; // Clear box
+                } else {
+                    alert("Error sending note.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Connection failed.");
+            }
+        }
+    </script>
+</body>
+</html>
