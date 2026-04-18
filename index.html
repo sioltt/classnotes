@@ -3,49 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quick Notes to Discord</title>
+    <title>Note Drop</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background: #2c2f33; color: white; }
-        textarea { width: 90%; max-width: 500px; height: 150px; border-radius: 8px; padding: 10px; font-size: 16px; margin-bottom: 10px; }
-        button { background: #5865F2; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 18px; }
-        button:active { background: #4752c4; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #23272a; color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .container { background: #2c2f33; padding: 25px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.3); width: 90%; max-width: 400px; text-align: center; }
+        textarea { width: 100%; height: 120px; border-radius: 8px; border: 1px solid #444; background: #40444b; color: white; padding: 12px; font-size: 16px; box-sizing: border-box; resize: none; outline: none; margin-bottom: 15px; }
+        input { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #444; background: #40444b; color: white; box-sizing: border-box; }
+        button { background: #5865F2; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: 0.2s; }
+        button:hover { background: #4752c4; }
+        button:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
 
-    <h2>📝 Send a Note</h2>
-    <textarea id="noteInput" placeholder="Type your note here..."></textarea>
-    <br>
-    <button onclick="sendNote()">Send to Discord</button>
+    <div class="container">
+        <h2>📝 Secure Note</h2>
+        <input type="password" id="passInput" placeholder="Enter Secret Key">
+        <textarea id="noteInput" placeholder="Write your note..."></textarea>
+        <button onclick="handleSend()">Send to Discord</button>
+    </div>
 
     <script>
-        async function sendNote() {
+        // --- SECURITY SETUP ---
+        // 1. Go to base64encode.org
+        // 2. Paste your Webhook URL and hit Encode
+        // 3. Paste that result inside the quotes below:
+        const KEY = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ5NDg1NDg4MzY0NjYzNjIyNC9pOFQ1RGVnVW8xVEJvdjJWZGNHeU04QlNUdVJYUURkSERCb0dQVVJHSjR4Z2ozNUNiYVZiVy0wLU04TWxfelZhMjdDTA=="; // This is just an example
+        
+        // Pick a password for yourself
+        const MY_PASS = "0921"; 
+
+        async function handleSend() {
+            const pass = document.getElementById('passInput').value;
             const note = document.getElementById('noteInput').value;
-            // ⚠️ REPLACE THE URL BELOW WITH YOUR ACTUAL WEBHOOK URL
-            const webhookUrl = 'https://discord.com/api/webhooks/1494854883646636224/i8T5DegUo1TBov2VdcGyM8BSTuRXQDdHDBoGPURGJ4xgj35CbaVbW-0-M8Ml_zVa27CL';
 
-            if (!note) return alert("Write something first!");
+            if (pass !== MY_PASS) {
+                alert("Wrong Key!");
+                return;
+            }
 
-            const payload = {
-                content: note
-            };
+            if (!note) return alert("Note is empty.");
+
+            // Decoding the URL only when the button is clicked
+            const hook = atob(KEY);
 
             try {
-                const response = await fetch(webhookUrl, {
+                const response = await fetch(hook, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({ content: `**New Note:**\n${note}` })
                 });
 
                 if (response.ok) {
-                    alert("Sent!");
-                    document.getElementById('noteInput').value = ''; // Clear box
+                    alert("Sent successfully!");
+                    document.getElementById('noteInput').value = '';
                 } else {
-                    alert("Error sending note.");
+                    alert("Error: Webhook refused connection.");
                 }
-            } catch (error) {
-                console.error(error);
-                alert("Connection failed.");
+            } catch (err) {
+                alert("Failed to reach Discord.");
             }
         }
     </script>
